@@ -3,7 +3,7 @@
 
 # Backup destination directory
 #
-# xamples:
+# Examples:
 # destination: ~/backups/
 # destination: /var/backups/postgresql/
 # destination: ${HOME}/pg_backups/

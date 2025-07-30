@@ -37,7 +37,7 @@ npm run dev hello world
 # Output: hello world
 
 npm run dev bak <database_name> <backup_name>
-# Creates backup: 2025-01-30_flipper_tu.dump
+# Creates backup: <backup_name>.dump
 ```
 
 ### Built Version
@@ -61,7 +61,7 @@ Examples:
 # Output: hello world
 
 ./dist/cli.js bak <database_name> <backup_name>
-# Creates backup: 2025-01-30_flipper_tu.dump
+# Creates backup: <backup_name>.dump
 ```
 
 ### Global Usage
@@ -79,7 +79,7 @@ pg_br hello world
 # Output: hello world
 
 pg_br bak <database_name> <backup_name>
-# Creates backup: 2025-01-30_flipper_tu.dump
+# Creates backup: <backup_name>.dump
 ```
 
 ## Commands
@@ -97,7 +97,7 @@ Creates a PostgreSQL database backup using `pg_dump` with the following flags:
 - `--no-owner` - Skip object ownership
 - `-h localhost` - Connect to localhost
 
-The backup file will be named `YYYY-MM-DD_<backup_name>.dump` and saved to:
+The backup file will be named `<backup_name>.dump` and saved to:
 
 - The directory specified in `~/.pg_br.yml` config file (if configured)
 - The current working directory (if no config file exists)
@@ -129,32 +129,7 @@ Shows usage information.
 
 ## Configuration
 
-pg_br supports a YAML configuration file at `~/.pg_br.yml` for customizing backup behavior.
-
-### Config File Example
-
-Create `~/.pg_br.yml`:
-
-```yaml
-# pg_br configuration file
-# Backup destination directory
-# Supports environment variable expansion using $VAR or ${VAR} syntax
-destination: $DEVS_HOME/dumps/
-# Alternative examples:
-# destination: ~/backups/
-# destination: /var/backups/postgresql/
-# destination: ${HOME}/pg_backups/
-```
-
-### Environment Variable Expansion
-
-The config file supports environment variable expansion:
-
-- `$VARNAME` - Simple variable expansion
-- `${VARNAME}` - Braced variable expansion (recommended)
-- `~` - Expands to user home directory
-
-If no config file is found, backups are saved to the current working directory.
+`pg_br` supports a YAML configuration file located at `~/.pg_br.yml` for customizing backup behavior. Create the file at `~/.pg_br.yml`, using `.pg_br.yml.example` as a reference.
 
 ## Prerequisites
 
@@ -166,15 +141,35 @@ If no config file is found, backups are saved to the current working directory.
 ```
 pg_br/
 ├── src/
-│   └── cli.ts          # CLI entry point
-├── dist/               # Built JavaScript (generated)
-├── .pg_br.yml.example  # Example configuration file
-├── package.json        # Node.js package configuration
-├── tsconfig.json       # TypeScript configuration
-├── CLAUDE.md          # Claude Code guidance
-└── README.md          # This file
+│   ├── cli.ts              # CLI entry point and main router
+│   ├── commands/           # Command implementations
+│   │   ├── index.ts        # Command exports
+│   │   ├── backup.ts       # Database backup functionality
+│   │   ├── list.ts         # List backup files
+│   │   ├── restore.ts      # Interactive restore from backups
+│   │   └── remove.ts       # Interactive backup file removal
+│   ├── utils/              # Shared utilities
+│   │   ├── index.ts        # Utility exports
+│   │   ├── config.ts       # YAML configuration loading
+│   │   ├── files.ts        # File operations and backup management
+│   │   └── prompts.ts      # Interactive CLI prompts
+│   └── types/
+│       └── index.ts        # TypeScript type definitions
+├── tests/                  # Jest test suite
+│   ├── unit/               # Unit tests for commands and utils
+│   ├── integration/        # Integration tests
+│   └── __fixtures__/       # Test fixtures and mock data
+├── dist/                   # Built JavaScript (generated)
+├── coverage/               # Test coverage reports (generated)
+├── package.json            # Node.js package configuration
+├── tsconfig.json           # TypeScript configuration
+├── jest.config.js          # Jest testing configuration
+├── eslint.config.js        # ESLint configuration
+├── CLAUDE.md              # Claude Code guidance
+├── TESTING.md             # Testing documentation
+└── README.md              # This file
 ```
 
 ## License
 
-ISC
+MIT
