@@ -4,3 +4,5 @@ dist/
 .DS_Store
 
 .pg_br.yml
+
+coverage/**/*
