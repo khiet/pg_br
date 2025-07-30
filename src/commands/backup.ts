@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
-import { loadConfig } from '../utils';
+import { loadConfig } from '../utils/index.js';
 
 export function backupCommand(databaseName: string, backupName: string): void {
   try {

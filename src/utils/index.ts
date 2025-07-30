@@ -1,3 +1,3 @@
-export * from './config';
-export * from './files';
-export * from './prompts';
+export * from './config.js';
+export * from './files.js';
+export * from './prompts.js';

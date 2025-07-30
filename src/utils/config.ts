@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import * as yaml from 'js-yaml';
-import { Config } from '../types';
+import { Config } from '../types/index.js';
 
 export function expandPath(path: string): string {
   return path

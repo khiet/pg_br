@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { getBackupFiles, promptFileSelection } from '../utils';
+import { getBackupFiles, promptFileSelection } from '../utils/index.js';
 
 export function restoreCommand(databaseName: string): void {
   try {

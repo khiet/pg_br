@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { getBackupFiles, promptMultiFileSelection, promptConfirmation } from '../utils';
+import { getBackupFiles, promptMultiFileSelection, promptConfirmation } from '../utils/index.js';
 
 export function removeCommand(): void {
   try {

@@ -1,5 +1,5 @@
 import * as readline from 'readline';
-import { BackupFileBasic } from '../types';
+import { BackupFileBasic } from '../types/index.js';
 
 export function promptFileSelection(files: BackupFileBasic[]): Promise<string> {
   return new Promise((resolve, reject) => {

@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { getBackupDirectory, getDetailedBackupFiles } from '../utils';
+import { getBackupDirectory, getDetailedBackupFiles } from '../utils/index.js';
 
 export function listCommand(): void {
   try {

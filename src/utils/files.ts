@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
-import { BackupFile, BackupFileBasic } from '../types';
-import { loadConfig } from './config';
+import { BackupFile, BackupFileBasic } from '../types/index.js';
+import { loadConfig } from './config.js';
 
 export function getBackupDirectory(): string {
   const config = loadConfig();

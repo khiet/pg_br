@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { backupCommand, listCommand, restoreCommand, removeCommand } from './commands';
+import { backupCommand, listCommand, restoreCommand, removeCommand } from './commands/index.js';
 
 const args = process.argv.slice(2);
 const command = args[0];
