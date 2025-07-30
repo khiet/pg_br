@@ -28,7 +28,7 @@ function formatDate(): string {
 function backupDatabase(databaseName: string, backupName: string) {
   try {
     const timestamp = formatDate();
-    const fileName = `${backupName}_${timestamp}.dump`;
+    const fileName = `${timestamp}_${backupName}.dump`;
     const backupPath = join(process.cwd(), fileName);
     
     console.log(`Creating backup of database '${databaseName}' as '${fileName}'...`);

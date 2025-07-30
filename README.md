@@ -36,7 +36,7 @@ npm run dev hello world
 # Output: hello world
 
 npm run dev bak pave_api_development flipper_tu
-# Creates backup: flipper_tu_2025-01-30.dump
+# Creates backup: 2025-01-30_flipper_tu.dump
 ```
 
 ### Built Version
@@ -59,7 +59,7 @@ Examples:
 # Output: hello world
 
 ./dist/cli.js bak pave_api_development flipper_tu
-# Creates backup: flipper_tu_2025-01-30.dump
+# Creates backup: 2025-01-30_flipper_tu.dump
 ```
 
 ### Global Usage
@@ -76,7 +76,7 @@ pg_br hello world
 # Output: hello world
 
 pg_br bak pave_api_development flipper_tu
-# Creates backup: flipper_tu_2025-01-30.dump
+# Creates backup: 2025-01-30_flipper_tu.dump
 ```
 
 ## Commands
@@ -91,7 +91,7 @@ Creates a PostgreSQL database backup using `pg_dump` with the following flags:
 - `--no-owner` - Skip object ownership
 - `-h localhost` - Connect to localhost
 
-The backup file will be named `<backup_name>_YYYY-MM-DD.dump` and saved in the current directory.
+The backup file will be named `YYYY-MM-DD_<backup_name>.dump` and saved in the current directory.
 
 ### Message Echo
 ```bash
