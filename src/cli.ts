@@ -15,31 +15,35 @@ interface Config {
 
 function expandPath(path: string): string {
   // Expand environment variables
-  return path.replace(/\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, braced, unbraced) => {
-    const varName = braced || unbraced;
-    return process.env[varName] || match;
-  }).replace(/^~/, homedir());
+  return path
+    .replace(/\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, braced, unbraced) => {
+      const varName = braced || unbraced;
+      return process.env[varName] || match;
+    })
+    .replace(/^~/, homedir());
 }
 
 function loadConfig(): Config {
   const configPath = join(homedir(), '.pg_br.yml');
-  
+
   if (!existsSync(configPath)) {
     return {};
   }
-  
+
   try {
     const configContent = readFileSync(configPath, 'utf8');
     const config = yaml.load(configContent) as Config;
-    
+
     // Expand paths in config
     if (config.destination) {
       config.destination = expandPath(config.destination);
     }
-    
+
     return config;
   } catch (error) {
-    console.warn(`Warning: Failed to load config file ${configPath}: ${error instanceof Error ? error.message : String(error)}`);
+    console.warn(
+      `Warning: Failed to load config file ${configPath}: ${error instanceof Error ? error.message : String(error)}`
+    );
     return {};
   }
 }
@@ -56,11 +60,10 @@ function showUsage() {
   console.log('  pg_br ls');
 }
 
-
 function listBackups() {
   try {
     const config = loadConfig();
-    
+
     // Determine backup destination
     let backupDir: string;
     if (config.destination) {
@@ -68,15 +71,15 @@ function listBackups() {
     } else {
       backupDir = process.cwd();
     }
-    
+
     console.log(`Listing backups from: ${backupDir}`);
     console.log();
-    
+
     if (!existsSync(backupDir)) {
       console.log('No backup directory found.');
       return;
     }
-    
+
     try {
       const files = readdirSync(backupDir)
         .filter(file => file.endsWith('.dump'))
@@ -87,35 +90,36 @@ function listBackups() {
             name: file,
             size: stats.size,
             created: stats.birthtime,
-            modified: stats.mtime
+            modified: stats.mtime,
           };
         })
         .sort((a, b) => b.created.getTime() - a.created.getTime());
-      
+
       if (files.length === 0) {
         console.log('No backup files found.');
         return;
       }
-      
+
       console.log(`Found ${files.length} backup(s):`);
       console.log();
-      
+
       files.forEach(file => {
         const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
         const createdDate = file.created.toLocaleDateString();
         const createdTime = file.created.toLocaleTimeString();
-        
+
         console.log(`📁 ${file.name}`);
         console.log(`   Size: ${sizeInMB} MB`);
         console.log(`   Created: ${createdDate} ${createdTime}`);
         console.log();
       });
-      
     } catch (readError) {
-      console.error('Error reading backup directory:', readError instanceof Error ? readError.message : String(readError));
+      console.error(
+        'Error reading backup directory:',
+        readError instanceof Error ? readError.message : String(readError)
+      );
       process.exit(1);
     }
-    
   } catch (error) {
     console.error('Error listing backups:', error instanceof Error ? error.message : String(error));
     process.exit(1);
@@ -126,7 +130,7 @@ function backupDatabase(databaseName: string, backupName: string) {
   try {
     const config = loadConfig();
     const fileName = `${backupName}.dump`;
-    
+
     // Determine backup destination
     let backupDir: string;
     if (config.destination) {
@@ -136,21 +140,21 @@ function backupDatabase(databaseName: string, backupName: string) {
       backupDir = process.cwd();
       console.log('No config found, using current directory');
     }
-    
+
     // Ensure backup directory exists
     if (!existsSync(backupDir)) {
       console.log(`Creating backup directory: ${backupDir}`);
       mkdirSync(backupDir, { recursive: true });
     }
-    
+
     const backupPath = join(backupDir, fileName);
-    
+
     console.log(`Creating backup of database '${databaseName}' as '${fileName}'...`);
-    
+
     const pgDumpCommand = `pg_dump -Fc --no-acl --no-owner -h localhost -f "${backupPath}" "${databaseName}"`;
-    
+
     execSync(pgDumpCommand, { stdio: 'inherit' });
-    
+
     if (existsSync(backupPath)) {
       console.log(`✓ Backup created successfully: ${backupPath}`);
     } else {
@@ -169,7 +173,7 @@ if (command === 'bak') {
     console.error('Usage: pg_br bak <database_name> <backup_name>');
     process.exit(1);
   }
-  
+
   const [, databaseName, backupName] = args;
   backupDatabase(databaseName, backupName);
 } else if (command === 'ls') {
