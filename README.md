@@ -35,7 +35,7 @@ Examples:
 npm run dev hello world
 # Output: hello world
 
-npm run dev bak pave_api_development flipper_tu
+npm run dev bak <database_name> <backup_file_name>
 # Creates backup: 2025-01-30_flipper_tu.dump
 ```
 
@@ -58,7 +58,7 @@ Examples:
 ./dist/cli.js hello world
 # Output: hello world
 
-./dist/cli.js bak pave_api_development flipper_tu
+./dist/cli.js bak <database_name> <backup_file_name>
 # Creates backup: 2025-01-30_flipper_tu.dump
 ```
 
@@ -75,7 +75,7 @@ Examples:
 pg_br hello world
 # Output: hello world
 
-pg_br bak pave_api_development flipper_tu
+pg_br bak <database_name> <backup_file_name>
 # Creates backup: 2025-01-30_flipper_tu.dump
 ```
 
