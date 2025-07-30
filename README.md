@@ -1,6 +1,6 @@
 # pg_br
 
-A Node.js TypeScript CLI tool with PostgreSQL database backup functionality and message echoing.
+A Node.js TypeScript CLI tool for PostgreSQL database backup management with interactive prompts and YAML configuration support.
 
 ## Installation
 
@@ -24,7 +24,7 @@ npm install -g .
 
 ### Development Mode
 
-Run directly with ts-node:
+Run directly with tsx:
 
 ```bash
 npm run dev <arguments>
@@ -33,11 +33,17 @@ npm run dev <arguments>
 Examples:
 
 ```bash
-npm run dev hello world
-# Output: hello world
-
-npm run dev bak <database_name> <backup_name>
+npm run dev backup <database_name> <backup_name>
 # Creates backup: <backup_name>.dump
+
+npm run dev ls
+# Lists all backup files
+
+npm run dev restore <database_name>
+# Interactive restore from backup files
+
+npm run dev remove
+# Interactive removal of backup files
 ```
 
 ### Built Version
@@ -57,11 +63,17 @@ Run the built CLI:
 Examples:
 
 ```bash
-./dist/cli.js hello world
-# Output: hello world
-
-./dist/cli.js bak <database_name> <backup_name>
+./dist/cli.js backup <database_name> <backup_name>
 # Creates backup: <backup_name>.dump
+
+./dist/cli.js ls
+# Lists all backup files
+
+./dist/cli.js restore <database_name>
+# Interactive restore from backup files
+
+./dist/cli.js remove
+# Interactive removal of backup files
 ```
 
 ### Global Usage
@@ -75,11 +87,17 @@ pg_br <arguments>
 Examples:
 
 ```bash
-pg_br hello world
-# Output: hello world
-
-pg_br bak <database_name> <backup_name>
+pg_br backup <database_name> <backup_name>
 # Creates backup: <backup_name>.dump
+
+pg_br ls
+# Lists all backup files
+
+pg_br restore <database_name>
+# Interactive restore from backup files
+
+pg_br remove
+# Interactive removal of backup files
 ```
 
 ## Commands
@@ -87,15 +105,15 @@ pg_br bak <database_name> <backup_name>
 ### Database Backup
 
 ```bash
-pg_br bak <database_name> <backup_name>
+pg_br backup <database_name> <backup_name>
 ```
 
 Creates a PostgreSQL database backup using `pg_dump` with the following flags:
 
-- `-Fc` - Custom format (compressed)
+- `--verbose` - Verbose output
+- `--clean` - Include clean (drop) commands
 - `--no-acl` - Skip access control lists
 - `--no-owner` - Skip object ownership
-- `-h localhost` - Connect to localhost
 
 The backup file will be named `<backup_name>.dump` and saved to:
 
@@ -104,13 +122,29 @@ The backup file will be named `<backup_name>.dump` and saved to:
 
 The destination directory will be created automatically if it doesn't exist.
 
-### Message Echo
+### List Backups
 
 ```bash
-pg_br <message>
+pg_br ls
 ```
 
-Echoes the provided message to stdout.
+Lists all available backup files from the configured destination directory.
+
+### Restore Database
+
+```bash
+pg_br restore <database_name>
+```
+
+Interactively restore a database from available backup files. Prompts you to select from available backup files.
+
+### Remove Backups
+
+```bash
+pg_br remove
+```
+
+Interactively remove backup files. Supports individual selections and ranges (e.g., `1,3,5` or `1-3,7-9`).
 
 ### Help
 
@@ -125,7 +159,17 @@ Shows usage information.
 ## Scripts
 
 - `npm run build` - Compile TypeScript to JavaScript
-- `npm run dev <args>` - Run with ts-node for development
+- `npm run dev <args>` - Run with tsx for development
+- `npm run test` - Run all tests with Jest
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:unit` - Run only unit tests
+- `npm run test:integration` - Run only integration tests
+- `npm run lint` - Run ESLint on TypeScript files
+- `npm run lint:fix` - Auto-fix linting issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check if code is properly formatted
+- `npm run typecheck` - Run TypeScript type checking without emit
 
 ## Configuration
 
@@ -134,7 +178,7 @@ Shows usage information.
 ## Prerequisites
 
 - Node.js (for running the CLI)
-- PostgreSQL with `pg_dump` utility (for database backups)
+- PostgreSQL with `pg_dump` and `pg_restore` utilities (for database operations)
 
 ## Project Structure
 
