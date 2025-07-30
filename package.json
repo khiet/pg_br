@@ -1,6 +1,7 @@
 {
   "name": "pg_br",
   "version": "1.0.0",
+  "type": "module",
   "main": "dist/cli.js",
   "bin": {
     "pg_br": "dist/cli.js"
