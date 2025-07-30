@@ -54,11 +54,13 @@ function showUsage() {
   console.log('  pg_br backup <database_name> <backup_name> - Backup PostgreSQL database');
   console.log('  pg_br ls                                 - List all backups from destination');
   console.log('  pg_br restore <database_name>           - Restore database from backup file');
+  console.log('  pg_br remove                             - Remove backup files from destination');
   console.log('');
   console.log('Examples:');
   console.log('  pg_br backup pave_api_development flipper_tu');
   console.log('  pg_br ls');
   console.log('  pg_br restore pave_api_development');
+  console.log('  pg_br remove');
 }
 
 function listBackups() {
@@ -227,6 +229,145 @@ function restoreDatabase(databaseName: string) {
   }
 }
 
+function promptMultiFileSelection(files: { name: string; path: string }[]): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    console.log('\nAvailable backup files:');
+    files.forEach((file, index) => {
+      console.log(`  ${index + 1}. ${file.name}`);
+    });
+    console.log();
+
+    rl.question('Select files to remove (e.g., "1,3,5" or "1-3,5"): ', answer => {
+      rl.close();
+
+      try {
+        const selectedPaths: string[] = [];
+        const selections = answer.trim().split(',');
+
+        for (const selection of selections) {
+          const trimmed = selection.trim();
+
+          if (trimmed.includes('-')) {
+            // Handle ranges like "1-3"
+            const [start, end] = trimmed.split('-').map(n => parseInt(n.trim(), 10));
+            if (isNaN(start) || isNaN(end) || start < 1 || end > files.length || start > end) {
+              reject(new Error(`Invalid range: ${trimmed}`));
+              return;
+            }
+            for (let i = start; i <= end; i++) {
+              selectedPaths.push(files[i - 1].path);
+            }
+          } else {
+            // Handle single numbers
+            const num = parseInt(trimmed, 10);
+            if (isNaN(num) || num < 1 || num > files.length) {
+              reject(new Error(`Invalid selection: ${trimmed}`));
+              return;
+            }
+            selectedPaths.push(files[num - 1].path);
+          }
+        }
+
+        // Remove duplicates
+        const uniquePaths = [...new Set(selectedPaths)];
+        resolve(uniquePaths);
+      } catch {
+        reject(
+          new Error(
+            'Invalid selection format. Use numbers separated by commas (e.g., "1,3,5") or ranges (e.g., "1-3,5").'
+          )
+        );
+      }
+    });
+  });
+}
+
+function promptConfirmation(filePaths: string[]): Promise<boolean> {
+  return new Promise(resolve => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    console.log('\nFiles to be removed:');
+    filePaths.forEach(path => {
+      const fileName = path.split('/').pop() || path;
+      console.log(`  - ${fileName}`);
+    });
+    console.log();
+
+    rl.question('Are you sure you want to remove these files? (yes/no): ', answer => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'yes');
+    });
+  });
+}
+
+function removeBackupFiles() {
+  try {
+    console.log('Preparing to remove backup files...');
+
+    const backupFiles = getBackupFiles();
+
+    if (backupFiles.length === 0) {
+      console.log('No backup files found in the destination directory.');
+      console.log('Use "pg_br ls" to check available backups.');
+      return;
+    }
+
+    promptMultiFileSelection(backupFiles)
+      .then(selectedPaths => {
+        if (selectedPaths.length === 0) {
+          console.log('No files selected.');
+          return;
+        }
+
+        return promptConfirmation(selectedPaths).then(confirmed => {
+          if (!confirmed) {
+            console.log('Operation cancelled.');
+            return;
+          }
+
+          console.log('\nRemoving selected files...');
+
+          let successCount = 0;
+          let errorCount = 0;
+
+          for (const filePath of selectedPaths) {
+            try {
+              const fileName = filePath.split('/').pop() || filePath;
+              execSync(`rm "${filePath}"`, { stdio: 'pipe' });
+              console.log(`✓ Removed: ${fileName}`);
+              successCount++;
+            } catch {
+              const fileName = filePath.split('/').pop() || filePath;
+              console.error(`✗ Failed to remove: ${fileName}`);
+              errorCount++;
+            }
+          }
+
+          console.log(`\nOperation completed: ${successCount} removed, ${errorCount} failed.`);
+
+          if (errorCount > 0) {
+            process.exit(1);
+          }
+        });
+      })
+      .catch(error => {
+        console.error('✗ Remove failed:', error.message);
+        process.exit(1);
+      });
+  } catch (error) {
+    console.error('✗ Remove failed:', error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
 function backupDatabase(databaseName: string, backupName: string) {
   try {
     const config = loadConfig();
@@ -286,6 +427,14 @@ if (command === 'backup') {
 
   const [, databaseName] = args;
   restoreDatabase(databaseName);
+} else if (command === 'remove') {
+  if (args.length !== 1) {
+    console.error('Error: remove command requires no arguments');
+    console.error('Usage: pg_br remove');
+    process.exit(1);
+  }
+
+  removeBackupFiles();
 } else if (command === 'ls') {
   listBackups();
 } else if (command === 'help' || command === '--help' || command === '-h') {
