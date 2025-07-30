@@ -10,17 +10,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Structure
 
-- **Entry Point**: `src/cli.ts` - Single-file CLI containing all command logic and utilities
+- **Entry Point**: `src/cli.ts` - Simple command router that delegates to modular command implementations
+- **Command Modules**: `src/commands/` - Individual command implementations (backup, list, restore, remove)
+- **Utilities**: `src/utils/` - Shared functionality for config, file operations, and interactive prompts
+- **Types**: `src/types/` - TypeScript interfaces and type definitions
 - **Build Output**: `dist/cli.js` - Compiled JavaScript executable with shebang
 - **Package Binary**: Configured as `pg_br` command in package.json bin field
 - **Configuration**: `~/.pg_br.yml` - Optional YAML config file for backup destination
 
 ### Key Components
 
-- **Command Router**: Simple if/else chain handling `backup`, `ls`, `restore`, `remove`, `help`
-- **Config System**: YAML-based configuration with environment variable expansion
-- **Interactive Prompts**: Uses Node.js readline for file selection and confirmations
-- **PostgreSQL Integration**: Shells out to `pg_dump` and `pg_restore` commands
+- **Command Router**: Simple if/else chain in `src/cli.ts` that delegates to individual command modules
+- **Config System**: `src/utils/config.ts` - YAML-based configuration with environment variable expansion
+- **Interactive Prompts**: `src/utils/prompts.ts` - Readline-based prompts for file selection and confirmations
+- **File Operations**: `src/utils/files.ts` - Backup file discovery and management utilities
+- **PostgreSQL Integration**: Command modules shell out to `pg_dump` and `pg_restore` commands
 
 ## Development Workflow
 
@@ -28,8 +32,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm install                    # Install dependencies
-npm run dev <command> <args>   # Run with ts-node for development
+npm run dev <command> <args>   # Run with tsx for development
 npm run build                  # Compile TypeScript to JavaScript
+npm run test                   # Run all tests with Jest
+npm run test:watch             # Run tests in watch mode
+npm run test:coverage          # Run tests with coverage report
+npm run test:unit              # Run only unit tests
+npm run test:integration       # Run only integration tests
 npm run lint                   # Run ESLint on TypeScript files
 npm run lint:fix               # Auto-fix linting issues
 npm run format                 # Format code with Prettier
@@ -41,19 +50,22 @@ npm run typecheck              # Run TypeScript type checking without emit
 
 - **ESLint 9.x**: Modern flat config with TypeScript support and Prettier integration
 - **Prettier 3.x**: Code formatting with single quotes, 2-space indent, 100 char width
-- **TypeScript 5.8.3**: Strict mode enabled, CommonJS output for Node.js compatibility
+- **TypeScript 5.8.3**: Strict mode enabled, ES modules with Node16 module resolution
+- **Jest**: Testing framework with ts-jest preset, comprehensive unit and integration tests
+- **tsx**: Modern TypeScript runner for development, replacing ts-node
 
 ## CLI Commands Architecture
 
 ### Command Structure
 
-All commands follow this pattern in `src/cli.ts`:
+All commands follow this modular pattern:
 
-1. **Argument validation** - Check correct number of arguments
-2. **Config loading** - Load `~/.pg_br.yml` if it exists
-3. **Interactive prompts** - Use readline for user input when needed
-4. **Command execution** - Shell out to external tools or perform file operations
-5. **Error handling** - Consistent error messages and exit codes
+1. **Router** (`src/cli.ts`) - Argument validation and command delegation
+2. **Command Implementation** (`src/commands/*.ts`) - Individual command logic
+3. **Config loading** - Load `~/.pg_br.yml` using `src/utils/config.ts`
+4. **Interactive prompts** - Use `src/utils/prompts.ts` for user input
+5. **File operations** - Use `src/utils/files.ts` for backup management
+6. **Error handling** - Consistent error messages and exit codes
 
 ### Available Commands
 
@@ -65,7 +77,7 @@ All commands follow this pattern in `src/cli.ts`:
 
 ### Configuration System
 
-The `loadConfig()` function handles:
+The `src/utils/config.ts` module handles:
 
 - YAML parsing of `~/.pg_br.yml` configuration file
 - Environment variable expansion (`$VAR`, `${VAR}`)
@@ -81,19 +93,24 @@ The `loadConfig()` function handles:
 
 ## Key Utilities
 
-### Path and Config Management
+### Path and Config Management (`src/utils/config.ts`)
 
 - `expandPath()` - Expands environment variables and home directory in paths
-- `getBackupFiles()` - Scans backup directory for .dump files, returns sorted by date
 - `loadConfig()` - Loads and processes YAML configuration with path expansion
 
-### PostgreSQL Operations
+### File Operations (`src/utils/files.ts`)
 
-- `backupDatabase()` - Executes pg_dump with standard flags (--verbose --clean --no-acl --no-owner)
-- `restoreDatabase()` - Interactive restore with file selection and pg_restore execution
-- `removeBackupFiles()` - Interactive multi-file deletion with confirmation
+- `getBackupFiles()` - Scans backup directory for .dump files, returns sorted by date
+- File listing and metadata extraction for backup management
 
-### Interactive Prompts
+### Command Implementations (`src/commands/`)
+
+- `backupCommand()` - Executes pg_dump with standard flags (--verbose --clean --no-acl --no-owner)
+- `restoreCommand()` - Interactive restore with file selection and pg_restore execution
+- `removeCommand()` - Interactive multi-file deletion with confirmation
+- `listCommand()` - Display available backup files
+
+### Interactive Prompts (`src/utils/prompts.ts`)
 
 - Support for individual selections (`1,3,5`) and ranges (`1-3,7-9`)
 - Duplicate removal and input validation
@@ -109,10 +126,12 @@ The `loadConfig()` function handles:
 
 ### Development Dependencies
 
-- TypeScript toolchain with strict mode
+- TypeScript toolchain with strict mode and ES module support
 - ESLint 9.x with TypeScript parser and rules
 - Prettier 3.x with ESLint integration
-- ts-node for development workflow
+- tsx for modern TypeScript development workflow
+- Jest with ts-jest for comprehensive testing
+- @types packages for TypeScript definitions
 
 ### External Tools Required
 
@@ -160,13 +179,32 @@ destination: $DEVS_HOME/dumps/
 ### TypeScript Patterns
 
 - Strict mode enabled with comprehensive type checking
-- Interface definitions for configuration structures
+- Interface definitions for configuration structures (`src/types/index.ts`)
 - Explicit error handling with instanceof checks
-- CommonJS modules for Node.js compatibility
+- ES modules with Node16 module resolution for modern Node.js compatibility
+- Modular architecture with clear separation of concerns
 
 ### CLI Patterns
 
-- Simple argument parsing with `process.argv.slice(2)`
-- Command routing via if/else chain
+- Simple argument parsing with `process.argv.slice(2)` in main router
+- Command routing via if/else chain that delegates to modular command implementations
+- Modular command structure with separation of concerns
 - Consistent help text formatting and examples
 - Interactive prompts using Node.js readline module
+
+## Testing
+
+### Test Structure
+
+- **Unit Tests**: `tests/unit/` - Test individual functions and modules in isolation
+- **Integration Tests**: `tests/integration/` - Test command flows and file operations
+- **Test Fixtures**: `tests/__fixtures__/` - Mock data and test utilities
+- **Jest Configuration**: Comprehensive test setup with coverage reporting
+
+### Testing Commands
+
+- `npm run test` - Run all tests
+- `npm run test:unit` - Run only unit tests
+- `npm run test:integration` - Run only integration tests  
+- `npm run test:watch` - Run tests in watch mode for development
+- `npm run test:coverage` - Generate coverage reports
