@@ -51,13 +51,11 @@ function loadConfig(): Config {
 
 function showUsage() {
   console.log('Usage:');
-  console.log('  pg_br <message>          - Echo a message');
   console.log('  pg_br bak <database_name> <backup_name> - Backup PostgreSQL database');
-  console.log('  pg_br ls                 - List all backups from destination');
+  console.log('  pg_br ls                                 - List all backups from destination');
   console.log('  pg_br restore <database_name>           - Restore database from backup file');
   console.log('');
   console.log('Examples:');
-  console.log('  pg_br hello world');
   console.log('  pg_br bak pave_api_development flipper_tu');
   console.log('  pg_br ls');
   console.log('  pg_br restore pave_api_development');
@@ -295,6 +293,7 @@ if (command === 'bak') {
 } else if (args.length === 0) {
   showUsage();
 } else {
-  const message = args.join(' ');
-  console.log(message);
+  console.error(`Unknown command: ${command}`);
+  console.error('Use "pg_br help" to see available commands.');
+  process.exit(1);
 }
