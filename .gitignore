@@ -6,3 +6,4 @@ dist/
 .pg_br.yml
 
 coverage/**/*
+*.test.js
