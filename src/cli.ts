@@ -88,7 +88,7 @@ function backupDatabase(databaseName: string, backupName: string) {
     
     console.log(`Creating backup of database '${databaseName}' as '${fileName}'...`);
     
-    const pgDumpCommand = `pg_dump -Fc --no-acl --no-owner -h localhost "${databaseName}" > "${backupPath}"`;
+    const pgDumpCommand = `pg_dump -Fc --no-acl --no-owner -h localhost -f "${backupPath}" "${databaseName}"`;
     
     execSync(pgDumpCommand, { stdio: 'inherit' });
     
