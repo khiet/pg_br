@@ -4,109 +4,147 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`pg_br` is a minimal TypeScript CLI tool that echoes command line arguments. It serves as a simple example of a Node.js CLI application built with TypeScript.
+`pg_br` is a TypeScript CLI tool for PostgreSQL database backup management. It provides commands to backup, list, restore, and remove PostgreSQL database dump files with interactive prompts and YAML configuration support.
 
 ## Architecture
 
 ### Core Structure
-- **Entry Point**: `/Users/khietle/pg_br/src/cli.ts` - Single file containing the CLI logic
-- **Build Output**: `/Users/khietle/pg_br/dist/cli.js` - Compiled JavaScript executable
+- **Entry Point**: `src/cli.ts` - Single-file CLI containing all command logic and utilities
+- **Build Output**: `dist/cli.js` - Compiled JavaScript executable with shebang
 - **Package Binary**: Configured as `pg_br` command in package.json bin field
+- **Configuration**: `~/.pg_br.yml` - Optional YAML config file for backup destination
 
-### Key Files
-- `src/cli.ts` - Main CLI implementation (6 lines of TypeScript)
-- `package.json` - Package configuration with bin setup
-- `tsconfig.json` - TypeScript compilation configuration
-- `dist/cli.js` - Compiled output with shebang for CLI execution
+### Key Components
+- **Command Router**: Simple if/else chain handling `backup`, `ls`, `restore`, `remove`, `help`
+- **Config System**: YAML-based configuration with environment variable expansion
+- **Interactive Prompts**: Uses Node.js readline for file selection and confirmations
+- **PostgreSQL Integration**: Shells out to `pg_dump` and `pg_restore` commands
 
 ## Development Workflow
 
-### Available Scripts
-- `npm run build` - Compile TypeScript to JavaScript using `tsc`
-- `npm run dev <args>` - Run directly with ts-node for development
-- `npm test` - Not implemented (placeholder script)
+### Essential Commands
+```bash
+npm install                    # Install dependencies
+npm run dev <command> <args>   # Run with ts-node for development
+npm run build                  # Compile TypeScript to JavaScript
+npm run lint                   # Run ESLint on TypeScript files
+npm run lint:fix               # Auto-fix linting issues
+npm run format                 # Format code with Prettier
+npm run format:check           # Check if code is properly formatted
+npm run typecheck              # Run TypeScript type checking without emit
+```
 
-### Build System
-- **Compiler**: TypeScript 5.8.3 with strict mode enabled
-- **Target**: ES2016 with CommonJS modules
-- **Input**: `./src` directory (rootDir)
-- **Output**: `./dist` directory (outDir)
-- **Development**: Uses ts-node for direct TypeScript execution
+### Code Quality Tools
+- **ESLint 9.x**: Modern flat config with TypeScript support and Prettier integration
+- **Prettier 3.x**: Code formatting with single quotes, 2-space indent, 100 char width
+- **TypeScript 5.8.3**: Strict mode enabled, CommonJS output for Node.js compatibility
 
-### TypeScript Configuration
-- Strict type checking enabled
-- ES module interop for CommonJS compatibility
-- Force consistent casing in file names
-- Skip lib check for faster compilation
-- Source files in `src/`, compiled output in `dist/`
+## CLI Commands Architecture
 
-## CLI Implementation Details
+### Command Structure
+All commands follow this pattern in `src/cli.ts`:
+1. **Argument validation** - Check correct number of arguments
+2. **Config loading** - Load `~/.pg_br.yml` if it exists
+3. **Interactive prompts** - Use readline for user input when needed
+4. **Command execution** - Shell out to external tools or perform file operations
+5. **Error handling** - Consistent error messages and exit codes
 
-### Argument Processing
-The CLI uses Node.js built-in `process.argv` to handle command line arguments:
-- `process.argv.slice(2)` removes node executable and script path
-- Arguments are joined with spaces and echoed to stdout
-- No argument parsing library used (commander, yargs, etc.)
+### Available Commands
+- `pg_br backup <database_name> <backup_name>` - Create PostgreSQL backup using pg_dump
+- `pg_br ls` - List all backup files from configured destination
+- `pg_br restore <database_name>` - Interactive restore from backup file selection
+- `pg_br remove` - Interactive multi-file removal with confirmation
+- `pg_br help` - Show usage information
 
-### Executable Setup
-- Shebang: `#!/usr/bin/env node` in both source and compiled files
-- Binary name: `pg_br` (matches package name)
-- Global installation supported via `npm install -g .`
+### Configuration System
+The `loadConfig()` function handles:
+- YAML parsing of `~/.pg_br.yml` configuration file
+- Environment variable expansion (`$VAR`, `${VAR}`)
+- Home directory expansion (`~`)
+- Graceful fallback when config file doesn't exist
+
+### Interactive Components
+- **File Selection**: `promptFileSelection()` for single file choice (restore)
+- **Multi-File Selection**: `promptMultiFileSelection()` for multiple files with ranges (remove)
+- **Confirmation**: `promptConfirmation()` for destructive operations
+- **Input Validation**: Comprehensive error checking for user input
+
+## Key Utilities
+
+### Path and Config Management
+- `expandPath()` - Expands environment variables and home directory in paths
+- `getBackupFiles()` - Scans backup directory for .dump files, returns sorted by date
+- `loadConfig()` - Loads and processes YAML configuration with path expansion
+
+### PostgreSQL Operations
+- `backupDatabase()` - Executes pg_dump with standard flags (--verbose --clean --no-acl --no-owner)
+- `restoreDatabase()` - Interactive restore with file selection and pg_restore execution
+- `removeBackupFiles()` - Interactive multi-file deletion with confirmation
+
+### Interactive Prompts
+- Support for individual selections (`1,3,5`) and ranges (`1-3,7-9`)
+- Duplicate removal and input validation
+- Consistent error messaging and graceful cancellation
 
 ## Dependencies
 
 ### Runtime Dependencies
-- None (uses only Node.js built-ins)
+- `js-yaml` (^4.1.0) - YAML configuration parsing
+- `readline` (^1.3.0) - Interactive command-line prompts
+- `@types/js-yaml` (^4.0.9) - TypeScript definitions for js-yaml
 
 ### Development Dependencies
-- `typescript` (^5.8.3) - TypeScript compiler
-- `ts-node` (^10.9.2) - Direct TypeScript execution for development
-- `@types/node` (^24.1.0) - Node.js type definitions
+- TypeScript toolchain with strict mode
+- ESLint 9.x with TypeScript parser and rules
+- Prettier 3.x with ESLint integration
+- ts-node for development workflow
 
-## Git Configuration
-The `.gitignore` excludes:
-- `node_modules/` - npm dependencies
-- `dist/` - compiled output
-- `*.log` - log files
-- `.DS_Store` - macOS system files
+### External Tools Required
+- `pg_dump` - PostgreSQL backup utility
+- `pg_restore` - PostgreSQL restore utility
+- `rm` - File removal (standard Unix command)
 
-## Development Commands
+## Error Handling Patterns
 
-### Local Development
-```bash
-npm install          # Install dependencies
-npm run dev hello    # Run with ts-node: outputs "hello"
-npm run build        # Compile TypeScript
-./dist/cli.js hello  # Run compiled version: outputs "hello"
+### Consistent Error Reporting
+- All errors use `console.error()` for stderr output
+- Exit codes: 0 for success, 1 for errors
+- User-friendly error messages with usage hints
+- Graceful handling of missing external dependencies
+
+### Interactive Error Handling
+- Input validation with helpful error messages
+- Cancellation support for all interactive operations
+- File operation error reporting with success/failure counts
+
+## Configuration File Format
+
+The `~/.pg_br.yml` configuration supports:
+```yaml
+# Backup destination directory with environment variable support
+destination: ~/backups/postgresql/
+# OR using environment variables:
+destination: ${HOME}/pg_backups/
+destination: $DEVS_HOME/dumps/
 ```
 
-### Global Installation
-```bash
-npm install -g .     # Install globally
-pg_br hello world    # Use globally: outputs "hello world"
-```
+## Code Style and Patterns
 
-## Code Patterns
+### Formatting Standards
+- Single quotes for strings
+- 2-space indentation (no tabs)
+- 100 character line width
+- Trailing commas in ES5-compatible positions
+- Semicolons required
 
-### Simple CLI Pattern
-This codebase demonstrates the minimal viable CLI pattern:
-1. Shebang for executable permission
-2. Process argv for argument handling
-3. Direct console output
-4. No external dependencies for core functionality
-
-### TypeScript Setup
-Standard TypeScript configuration for Node.js CLI tools:
+### TypeScript Patterns
+- Strict mode enabled with comprehensive type checking
+- Interface definitions for configuration structures
+- Explicit error handling with instanceof checks
 - CommonJS modules for Node.js compatibility
-- Strict typing for code quality
-- Separate source and dist directories
-- Development workflow with ts-node
 
-## Testing
-No testing framework is currently configured. The package.json includes a placeholder test script that exits with error.
-
-## Maintenance Notes
-- Single file CLI implementation makes it easy to understand and modify
-- Build process is straightforward TypeScript compilation
-- No complex dependencies or build tools
-- Ready for extension with argument parsing libraries if needed
+### CLI Patterns
+- Simple argument parsing with `process.argv.slice(2)`
+- Command routing via if/else chain
+- Consistent help text formatting and examples
+- Interactive prompts using Node.js readline module
