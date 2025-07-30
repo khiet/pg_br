@@ -56,13 +56,6 @@ function showUsage() {
   console.log('  pg_br ls');
 }
 
-function formatDate(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 function listBackups() {
   try {
@@ -132,8 +125,7 @@ function listBackups() {
 function backupDatabase(databaseName: string, backupName: string) {
   try {
     const config = loadConfig();
-    const timestamp = formatDate();
-    const fileName = `${timestamp}_${backupName}.dump`;
+    const fileName = `${backupName}.dump`;
     
     // Determine backup destination
     let backupDir: string;
