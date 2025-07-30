@@ -31,6 +31,7 @@ npm run dev <arguments>
 ```
 
 Examples:
+
 ```bash
 npm run dev hello world
 # Output: hello world
@@ -54,6 +55,7 @@ Run the built CLI:
 ```
 
 Examples:
+
 ```bash
 ./dist/cli.js hello world
 # Output: hello world
@@ -71,6 +73,7 @@ pg_br <arguments>
 ```
 
 Examples:
+
 ```bash
 pg_br hello world
 # Output: hello world
@@ -82,33 +85,41 @@ pg_br bak <database_name> <backup_name>
 ## Commands
 
 ### Database Backup
+
 ```bash
 pg_br bak <database_name> <backup_name>
 ```
+
 Creates a PostgreSQL database backup using `pg_dump` with the following flags:
+
 - `-Fc` - Custom format (compressed)
 - `--no-acl` - Skip access control lists
 - `--no-owner` - Skip object ownership
 - `-h localhost` - Connect to localhost
 
 The backup file will be named `YYYY-MM-DD_<backup_name>.dump` and saved to:
+
 - The directory specified in `~/.pg_br.yml` config file (if configured)
 - The current working directory (if no config file exists)
 
 The destination directory will be created automatically if it doesn't exist.
 
 ### Message Echo
+
 ```bash
 pg_br <message>
 ```
+
 Echoes the provided message to stdout.
 
 ### Help
+
 ```bash
 pg_br help
 pg_br --help
 pg_br -h
 ```
+
 Shows usage information.
 
 ## Scripts
@@ -129,7 +140,6 @@ Create `~/.pg_br.yml`:
 # Backup destination directory
 # Supports environment variable expansion using $VAR or ${VAR} syntax
 destination: $DEVS_HOME/dumps/
-
 # Alternative examples:
 # destination: ~/backups/
 # destination: /var/backups/postgresql/
@@ -139,6 +149,7 @@ destination: $DEVS_HOME/dumps/
 ### Environment Variable Expansion
 
 The config file supports environment variable expansion:
+
 - `$VARNAME` - Simple variable expansion
 - `${VARNAME}` - Braced variable expansion (recommended)
 - `~` - Expands to user home directory

@@ -45,24 +45,24 @@ export default [
           argsIgnorePattern: '^_',
         },
       ],
-      
+
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': 'off', // Using unused-imports instead
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-      
+
       // General JavaScript/TypeScript rules
       'no-console': 'off', // Allow console.log for CLI tool
       'no-unused-vars': 'off', // Use TypeScript version instead
       'prefer-const': 'error',
       'no-var': 'error',
-      'eqeqeq': ['error', 'always'],
-      'curly': ['error', 'all'],
+      eqeqeq: ['error', 'always'],
+      curly: ['error', 'all'],
       'brace-style': ['error', '1tbs'],
       'comma-dangle': ['error', 'always-multiline'],
-      
+
       // Code quality rules
       'no-duplicate-imports': 'error',
       'no-unreachable': 'error',
@@ -79,7 +79,7 @@ export default [
       'no-unsafe-negation': 'error',
       'use-isnan': 'error',
       'valid-typeof': 'error',
-      
+
       // Prettier integration
       'prettier/prettier': 'error',
     },

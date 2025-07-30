@@ -39,11 +39,13 @@ tests/
 The following tests are fully functional and demonstrate the testing setup:
 
 ### Basic Tests (`tests/basic.test.ts`)
+
 - Module import validation
 - CLI component structure verification
 - TypeScript interface validation
 
 ### Configuration Tests (`tests/unit/utils/config.simple.test.ts`)
+
 - Environment variable expansion
 - Home directory path resolution
 - Complex path handling
@@ -51,28 +53,33 @@ The following tests are fully functional and demonstrate the testing setup:
 ## Test Configuration
 
 ### Jest Configuration (`jest.config.js`)
+
 - TypeScript support via `ts-jest`
 - Test environment: Node.js
 - Coverage collection from `src/` directory
 - Custom setup file with global mocks
 
 ### TypeScript Configuration
+
 - Tests excluded from build via `tsconfig.json`
 - Separate type checking for test files via Jest
 
 ## Testing Philosophy
 
 ### Unit Tests
+
 - Test individual functions in isolation
 - Mock external dependencies (fs, child_process, etc.)
 - Focus on business logic and edge cases
 
 ### Integration Tests
+
 - Test component interactions
 - Use temporary directories for file operations
 - Test configuration loading and path resolution
 
 ### Mocking Strategy
+
 - External commands (`pg_dump`, `pg_restore`) are mocked
 - File system operations use temporary test directories
 - Console output is mocked to reduce test noise
@@ -93,12 +100,14 @@ npm test -- tests/basic.test.ts
 ## Coverage Report
 
 The test suite provides coverage reporting for:
+
 - Statement coverage
-- Branch coverage  
+- Branch coverage
 - Function coverage
 - Line coverage
 
 Current working test coverage focuses on:
+
 - Configuration utilities (`expandPath` function)
 - Module structure validation
 - Import/export functionality

@@ -9,12 +9,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture
 
 ### Core Structure
+
 - **Entry Point**: `src/cli.ts` - Single-file CLI containing all command logic and utilities
 - **Build Output**: `dist/cli.js` - Compiled JavaScript executable with shebang
 - **Package Binary**: Configured as `pg_br` command in package.json bin field
 - **Configuration**: `~/.pg_br.yml` - Optional YAML config file for backup destination
 
 ### Key Components
+
 - **Command Router**: Simple if/else chain handling `backup`, `ls`, `restore`, `remove`, `help`
 - **Config System**: YAML-based configuration with environment variable expansion
 - **Interactive Prompts**: Uses Node.js readline for file selection and confirmations
@@ -23,6 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Workflow
 
 ### Essential Commands
+
 ```bash
 npm install                    # Install dependencies
 npm run dev <command> <args>   # Run with ts-node for development
@@ -35,6 +38,7 @@ npm run typecheck              # Run TypeScript type checking without emit
 ```
 
 ### Code Quality Tools
+
 - **ESLint 9.x**: Modern flat config with TypeScript support and Prettier integration
 - **Prettier 3.x**: Code formatting with single quotes, 2-space indent, 100 char width
 - **TypeScript 5.8.3**: Strict mode enabled, CommonJS output for Node.js compatibility
@@ -42,7 +46,9 @@ npm run typecheck              # Run TypeScript type checking without emit
 ## CLI Commands Architecture
 
 ### Command Structure
+
 All commands follow this pattern in `src/cli.ts`:
+
 1. **Argument validation** - Check correct number of arguments
 2. **Config loading** - Load `~/.pg_br.yml` if it exists
 3. **Interactive prompts** - Use readline for user input when needed
@@ -50,6 +56,7 @@ All commands follow this pattern in `src/cli.ts`:
 5. **Error handling** - Consistent error messages and exit codes
 
 ### Available Commands
+
 - `pg_br backup <database_name> <backup_name>` - Create PostgreSQL backup using pg_dump
 - `pg_br ls` - List all backup files from configured destination
 - `pg_br restore <database_name>` - Interactive restore from backup file selection
@@ -57,13 +64,16 @@ All commands follow this pattern in `src/cli.ts`:
 - `pg_br help` - Show usage information
 
 ### Configuration System
+
 The `loadConfig()` function handles:
+
 - YAML parsing of `~/.pg_br.yml` configuration file
 - Environment variable expansion (`$VAR`, `${VAR}`)
 - Home directory expansion (`~`)
 - Graceful fallback when config file doesn't exist
 
 ### Interactive Components
+
 - **File Selection**: `promptFileSelection()` for single file choice (restore)
 - **Multi-File Selection**: `promptMultiFileSelection()` for multiple files with ranges (remove)
 - **Confirmation**: `promptConfirmation()` for destructive operations
@@ -72,16 +82,19 @@ The `loadConfig()` function handles:
 ## Key Utilities
 
 ### Path and Config Management
+
 - `expandPath()` - Expands environment variables and home directory in paths
 - `getBackupFiles()` - Scans backup directory for .dump files, returns sorted by date
 - `loadConfig()` - Loads and processes YAML configuration with path expansion
 
 ### PostgreSQL Operations
+
 - `backupDatabase()` - Executes pg_dump with standard flags (--verbose --clean --no-acl --no-owner)
 - `restoreDatabase()` - Interactive restore with file selection and pg_restore execution
 - `removeBackupFiles()` - Interactive multi-file deletion with confirmation
 
 ### Interactive Prompts
+
 - Support for individual selections (`1,3,5`) and ranges (`1-3,7-9`)
 - Duplicate removal and input validation
 - Consistent error messaging and graceful cancellation
@@ -89,17 +102,20 @@ The `loadConfig()` function handles:
 ## Dependencies
 
 ### Runtime Dependencies
+
 - `js-yaml` (^4.1.0) - YAML configuration parsing
 - `readline` (^1.3.0) - Interactive command-line prompts
 - `@types/js-yaml` (^4.0.9) - TypeScript definitions for js-yaml
 
 ### Development Dependencies
+
 - TypeScript toolchain with strict mode
 - ESLint 9.x with TypeScript parser and rules
 - Prettier 3.x with ESLint integration
 - ts-node for development workflow
 
 ### External Tools Required
+
 - `pg_dump` - PostgreSQL backup utility
 - `pg_restore` - PostgreSQL restore utility
 - `rm` - File removal (standard Unix command)
@@ -107,12 +123,14 @@ The `loadConfig()` function handles:
 ## Error Handling Patterns
 
 ### Consistent Error Reporting
+
 - All errors use `console.error()` for stderr output
 - Exit codes: 0 for success, 1 for errors
 - User-friendly error messages with usage hints
 - Graceful handling of missing external dependencies
 
 ### Interactive Error Handling
+
 - Input validation with helpful error messages
 - Cancellation support for all interactive operations
 - File operation error reporting with success/failure counts
@@ -120,6 +138,7 @@ The `loadConfig()` function handles:
 ## Configuration File Format
 
 The `~/.pg_br.yml` configuration supports:
+
 ```yaml
 # Backup destination directory with environment variable support
 destination: ~/backups/postgresql/
@@ -131,6 +150,7 @@ destination: $DEVS_HOME/dumps/
 ## Code Style and Patterns
 
 ### Formatting Standards
+
 - Single quotes for strings
 - 2-space indentation (no tabs)
 - 100 character line width
@@ -138,12 +158,14 @@ destination: $DEVS_HOME/dumps/
 - Semicolons required
 
 ### TypeScript Patterns
+
 - Strict mode enabled with comprehensive type checking
 - Interface definitions for configuration structures
 - Explicit error handling with instanceof checks
 - CommonJS modules for Node.js compatibility
 
 ### CLI Patterns
+
 - Simple argument parsing with `process.argv.slice(2)`
 - Command routing via if/else chain
 - Consistent help text formatting and examples

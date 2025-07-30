@@ -15,8 +15,8 @@
     "test:integration": "jest tests/integration",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "format": "prettier --write src/**/*.ts",
-    "format:check": "prettier --check src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"*.js\" \"*.json\" \"*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"*.js\" \"*.json\" \"*.md\"",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
