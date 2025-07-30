@@ -13,7 +13,7 @@ const mockGetBackupFiles = fileUtils.getBackupFiles as jest.MockedFunction<typeo
 const mockPromptFileSelection = promptUtils.promptFileSelection as jest.MockedFunction<typeof promptUtils.promptFileSelection>;
 
 describe('Restore Command', () => {
-  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation();
+  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -21,7 +21,7 @@ describe('Restore Command', () => {
   });
 
   it('should display message when no backup files found', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupFiles.mockReturnValue([]);
     
@@ -34,7 +34,7 @@ describe('Restore Command', () => {
   });
 
   it('should prompt for file selection and restore successfully', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -66,7 +66,7 @@ describe('Restore Command', () => {
   });
 
   it('should handle file selection rejection', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -87,7 +87,7 @@ describe('Restore Command', () => {
   });
 
   it('should handle pg_restore execution errors', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -104,14 +104,14 @@ describe('Restore Command', () => {
     // Wait for async operations
     await new Promise(resolve => setTimeout(resolve, 0));
     
-    expect(consoleSpy).toHaveBeenCalledWith('✗ Restore failed:', 'Invalid selection');
+    expect(consoleSpy).toHaveBeenCalledWith('✗ Restore failed:', 'pg_restore: database "testdb" does not exist');
     expect(mockProcessExit).toHaveBeenCalledWith(1);
     
     consoleSpy.mockRestore();
   });
 
   it('should handle general errors in try-catch', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     mockGetBackupFiles.mockImplementation(() => {
       throw new Error('File system error');
@@ -126,7 +126,7 @@ describe('Restore Command', () => {
   });
 
   it('should properly escape database name and file path', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup with spaces.dump', path: '/test/backup with spaces.dump' },
@@ -149,7 +149,7 @@ describe('Restore Command', () => {
   });
 
   it('should display preparation message', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupFiles.mockReturnValue([]);
     

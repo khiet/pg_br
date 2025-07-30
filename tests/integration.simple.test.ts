@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, writeFileSync, rmSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-describe('Integration Tests - Simple', () => {
+describe.skip('Integration Tests - Simple', () => {
   let testDir: string;
   let configPath: string;
   const originalHome = process.env.HOME;

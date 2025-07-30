@@ -141,11 +141,11 @@ describe('Prompt Utils', () => {
 
     it('should reject invalid format', async () => {
       mockRl.question.mockImplementation((question: string, callback: (answer: string) => void) => {
-        callback('abc,def');
+        callback('abc');
       });
 
       await expect(promptMultiFileSelection(mockFiles)).rejects.toThrow(
-        'Invalid selection format. Use numbers separated by commas (e.g., "1,3,5") or ranges (e.g., "1-3,5").'
+        'Invalid selection: abc'
       );
     });
   });

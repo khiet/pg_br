@@ -82,7 +82,7 @@ describe('File Utils', () => {
     });
 
     it('should handle file reading errors gracefully', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       mockExistsSync.mockReturnValue(true);
       mockReaddirSync.mockImplementation(() => {
@@ -139,7 +139,7 @@ describe('File Utils', () => {
     });
 
     it('should handle errors and return empty array', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       mockExistsSync.mockReturnValue(true);
       mockReaddirSync.mockImplementation(() => {

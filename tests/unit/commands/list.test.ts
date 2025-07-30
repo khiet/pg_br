@@ -11,7 +11,7 @@ const mockGetBackupDirectory = fileUtils.getBackupDirectory as jest.MockedFuncti
 const mockGetDetailedBackupFiles = fileUtils.getDetailedBackupFiles as jest.MockedFunction<typeof fileUtils.getDetailedBackupFiles>;
 
 describe('List Command', () => {
-  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation();
+  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -19,7 +19,7 @@ describe('List Command', () => {
   });
 
   it('should display backup directory path', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupDirectory.mockReturnValue('/test/backup/path');
     mockExistsSync.mockReturnValue(true);
@@ -33,7 +33,7 @@ describe('List Command', () => {
   });
 
   it('should display message when backup directory does not exist', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupDirectory.mockReturnValue('/nonexistent/path');
     mockExistsSync.mockReturnValue(false);
@@ -46,7 +46,7 @@ describe('List Command', () => {
   });
 
   it('should display message when no backup files found', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupDirectory.mockReturnValue('/test/backup/path');
     mockExistsSync.mockReturnValue(true);
@@ -60,7 +60,7 @@ describe('List Command', () => {
   });
 
   it('should display backup files with details', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       {
@@ -95,7 +95,7 @@ describe('List Command', () => {
   });
 
   it('should format file sizes correctly', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       {
@@ -127,7 +127,7 @@ describe('List Command', () => {
   });
 
   it('should display creation dates and times', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       {
@@ -152,7 +152,7 @@ describe('List Command', () => {
   });
 
   it('should handle errors and exit with code 1', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     mockGetBackupDirectory.mockImplementation(() => {
       throw new Error('Access denied');

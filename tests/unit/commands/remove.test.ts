@@ -14,7 +14,7 @@ const mockPromptMultiFileSelection = promptUtils.promptMultiFileSelection as jes
 const mockPromptConfirmation = promptUtils.promptConfirmation as jest.MockedFunction<typeof promptUtils.promptConfirmation>;
 
 describe('Remove Command', () => {
-  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation();
+  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -22,7 +22,7 @@ describe('Remove Command', () => {
   });
 
   it('should display message when no backup files found', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupFiles.mockReturnValue([]);
     
@@ -35,7 +35,7 @@ describe('Remove Command', () => {
   });
 
   it('should handle cancelled selection', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -55,7 +55,7 @@ describe('Remove Command', () => {
   });
 
   it('should handle cancelled confirmation', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -76,7 +76,7 @@ describe('Remove Command', () => {
   });
 
   it('should successfully remove selected files', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -103,8 +103,8 @@ describe('Remove Command', () => {
   });
 
   it('should handle partial removal failures', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -117,7 +117,7 @@ describe('Remove Command', () => {
     
     // Mock first file removal success, second file removal failure
     mockExecSync
-      .mockImplementationOnce(() => {}) // Success
+      .mockImplementationOnce(() => '' as any) // Success
       .mockImplementationOnce(() => {
         throw new Error('Permission denied');
       }); // Failure
@@ -137,7 +137,7 @@ describe('Remove Command', () => {
   });
 
   it('should handle file selection errors', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup1.dump', path: '/test/backup1.dump' },
@@ -158,7 +158,7 @@ describe('Remove Command', () => {
   });
 
   it('should handle general errors in try-catch', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     mockGetBackupFiles.mockImplementation(() => {
       throw new Error('File system error');
@@ -173,7 +173,7 @@ describe('Remove Command', () => {
   });
 
   it('should properly handle file paths with spaces', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     const mockFiles = [
       { name: 'backup with spaces.dump', path: '/test/backup with spaces.dump' },
@@ -195,7 +195,7 @@ describe('Remove Command', () => {
   });
 
   it('should display preparation message', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     
     mockGetBackupFiles.mockReturnValue([]);
     

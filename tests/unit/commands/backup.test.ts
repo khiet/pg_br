@@ -25,7 +25,9 @@ describe('Backup Command', () => {
 
   it('should create backup with default directory when no config', () => {
     mockLoadConfig.mockReturnValue({});
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync
+      .mockReturnValueOnce(true) // Directory exists
+      .mockReturnValueOnce(true); // Backup file exists after creation
     
     backupCommand('testdb', 'test-backup');
     
@@ -37,7 +39,9 @@ describe('Backup Command', () => {
 
   it('should create backup with configured directory', () => {
     mockLoadConfig.mockReturnValue({ destination: '/custom/backup/path' });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync
+      .mockReturnValueOnce(true) // Directory exists
+      .mockReturnValueOnce(true); // Backup file exists after creation
     
     backupCommand('testdb', 'test-backup');
     
@@ -49,7 +53,9 @@ describe('Backup Command', () => {
 
   it('should create backup directory if it does not exist', () => {
     mockLoadConfig.mockReturnValue({ destination: '/new/backup/path' });
-    mockExistsSync.mockReturnValue(false);
+    mockExistsSync
+      .mockReturnValueOnce(false) // Directory doesn't exist initially
+      .mockReturnValueOnce(true);  // Backup file exists after creation
     
     backupCommand('testdb', 'test-backup');
     
@@ -76,10 +82,9 @@ describe('Backup Command', () => {
       .mockReturnValueOnce(true)  // Directory exists
       .mockReturnValueOnce(false); // Backup file does not exist after creation
     
-    backupCommand('testdb', 'test-backup');
+    expect(() => backupCommand('testdb', 'test-backup')).toThrow('Process.exit called with code 1');
     
     expect(consoleSpy).toHaveBeenCalledWith('✗ Backup file was not created');
-    expect(mockProcessExit).toHaveBeenCalledWith(1);
     
     consoleSpy.mockRestore();
   });
@@ -93,13 +98,12 @@ describe('Backup Command', () => {
       throw new Error('pg_dump: database "testdb" does not exist');
     });
     
-    backupCommand('testdb', 'test-backup');
+    expect(() => backupCommand('testdb', 'test-backup')).toThrow('Process.exit called with code 1');
     
     expect(consoleSpy).toHaveBeenCalledWith(
       '✗ Backup failed:',
       'pg_dump: database "testdb" does not exist'
     );
-    expect(mockProcessExit).toHaveBeenCalledWith(1);
     
     consoleSpy.mockRestore();
   });
@@ -113,27 +117,27 @@ describe('Backup Command', () => {
       throw new Error('Permission denied');
     });
     
-    backupCommand('testdb', 'test-backup');
+    expect(() => backupCommand('testdb', 'test-backup')).toThrow('Process.exit called with code 1');
     
     expect(consoleSpy).toHaveBeenCalledWith('✗ Backup failed:', 'Permission denied');
-    expect(mockProcessExit).toHaveBeenCalledWith(1);
     
     consoleSpy.mockRestore();
   });
 
   it('should properly escape database and file names', () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    
+    // Reset all mocks to clean state
     mockLoadConfig.mockReturnValue({});
     mockExistsSync.mockReturnValue(true);
+    mockMkdirSync.mockImplementation(() => {});
+    mockExecSync.mockImplementation(() => '' as any);
     
     backupCommand('test db with spaces', 'backup with spaces');
     
-    expect(mockExecSync).toHaveBeenCalledWith(
-      expect.stringContaining('"test db with spaces"'),
-      { stdio: 'inherit' }
-    );
-    expect(mockExecSync).toHaveBeenCalledWith(
-      expect.stringContaining('"backup with spaces.dump"'),
-      { stdio: 'inherit' }
-    );
+    const expectedCommand = `pg_dump -Fc --no-acl --no-owner -h localhost -f "${process.cwd()}/backup with spaces.dump" "test db with spaces"`;
+    expect(mockExecSync).toHaveBeenCalledWith(expectedCommand, { stdio: 'inherit' });
+    
+    consoleSpy.mockRestore();
   });
 });
