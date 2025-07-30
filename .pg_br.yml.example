@@ -1,0 +1,9 @@
+# pg_br configuration file
+# Copy this file to ~/.pg_br.yml and customize as needed
+
+# Backup destination directory
+#
+# xamples:
+# destination: ~/backups/
+# destination: /var/backups/postgresql/
+# destination: ${HOME}/pg_backups/

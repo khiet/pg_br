@@ -1,11 +1,48 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readFileSync, mkdirSync } from 'fs';
+import { join, resolve } from 'path';
+import { homedir } from 'os';
+import * as yaml from 'js-yaml';
 
 const args = process.argv.slice(2);
 const command = args[0];
+
+interface Config {
+  destination?: string;
+}
+
+function expandPath(path: string): string {
+  // Expand environment variables
+  return path.replace(/\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, braced, unbraced) => {
+    const varName = braced || unbraced;
+    return process.env[varName] || match;
+  }).replace(/^~/, homedir());
+}
+
+function loadConfig(): Config {
+  const configPath = join(homedir(), '.pg_br.yml');
+  
+  if (!existsSync(configPath)) {
+    return {};
+  }
+  
+  try {
+    const configContent = readFileSync(configPath, 'utf8');
+    const config = yaml.load(configContent) as Config;
+    
+    // Expand paths in config
+    if (config.destination) {
+      config.destination = expandPath(config.destination);
+    }
+    
+    return config;
+  } catch (error) {
+    console.warn(`Warning: Failed to load config file ${configPath}: ${error instanceof Error ? error.message : String(error)}`);
+    return {};
+  }
+}
 
 function showUsage() {
   console.log('Usage:');
@@ -27,9 +64,27 @@ function formatDate(): string {
 
 function backupDatabase(databaseName: string, backupName: string) {
   try {
+    const config = loadConfig();
     const timestamp = formatDate();
     const fileName = `${timestamp}_${backupName}.dump`;
-    const backupPath = join(process.cwd(), fileName);
+    
+    // Determine backup destination
+    let backupDir: string;
+    if (config.destination) {
+      backupDir = resolve(config.destination);
+      console.log(`Using configured backup destination: ${backupDir}`);
+    } else {
+      backupDir = process.cwd();
+      console.log('No config found, using current directory');
+    }
+    
+    // Ensure backup directory exists
+    if (!existsSync(backupDir)) {
+      console.log(`Creating backup directory: ${backupDir}`);
+      mkdirSync(backupDir, { recursive: true });
+    }
+    
+    const backupPath = join(backupDir, fileName);
     
     console.log(`Creating backup of database '${databaseName}' as '${fileName}'...`);
     
@@ -38,7 +93,7 @@ function backupDatabase(databaseName: string, backupName: string) {
     execSync(pgDumpCommand, { stdio: 'inherit' });
     
     if (existsSync(backupPath)) {
-      console.log(`✓ Backup created successfully: ${fileName}`);
+      console.log(`✓ Backup created successfully: ${backupPath}`);
     } else {
       console.error('✗ Backup file was not created');
       process.exit(1);

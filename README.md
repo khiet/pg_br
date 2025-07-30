@@ -91,7 +91,11 @@ Creates a PostgreSQL database backup using `pg_dump` with the following flags:
 - `--no-owner` - Skip object ownership
 - `-h localhost` - Connect to localhost
 
-The backup file will be named `YYYY-MM-DD_<backup_name>.dump` and saved in the current directory.
+The backup file will be named `YYYY-MM-DD_<backup_name>.dump` and saved to:
+- The directory specified in `~/.pg_br.yml` config file (if configured)
+- The current working directory (if no config file exists)
+
+The destination directory will be created automatically if it doesn't exist.
 
 ### Message Echo
 ```bash
@@ -112,6 +116,35 @@ Shows usage information.
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm run dev <args>` - Run with ts-node for development
 
+## Configuration
+
+pg_br supports a YAML configuration file at `~/.pg_br.yml` for customizing backup behavior.
+
+### Config File Example
+
+Create `~/.pg_br.yml`:
+
+```yaml
+# pg_br configuration file
+# Backup destination directory
+# Supports environment variable expansion using $VAR or ${VAR} syntax
+destination: $DEVS_HOME/dumps/
+
+# Alternative examples:
+# destination: ~/backups/
+# destination: /var/backups/postgresql/
+# destination: ${HOME}/pg_backups/
+```
+
+### Environment Variable Expansion
+
+The config file supports environment variable expansion:
+- `$VARNAME` - Simple variable expansion
+- `${VARNAME}` - Braced variable expansion (recommended)
+- `~` - Expands to user home directory
+
+If no config file is found, backups are saved to the current working directory.
+
 ## Prerequisites
 
 - Node.js (for running the CLI)
@@ -124,8 +157,10 @@ pg_br/
 ├── src/
 │   └── cli.ts          # CLI entry point
 ├── dist/               # Built JavaScript (generated)
+├── .pg_br.yml.example  # Example configuration file
 ├── package.json        # Node.js package configuration
 ├── tsconfig.json       # TypeScript configuration
+├── CLAUDE.md          # Claude Code guidance
 └── README.md          # This file
 ```
 
