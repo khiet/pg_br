@@ -3,6 +3,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default [
   js.configs.recommended,
@@ -30,10 +31,23 @@ export default [
     plugins: {
       '@typescript-eslint': tseslint,
       prettier: prettier,
+      'unused-imports': unusedImports,
     },
     rules: {
+      // Unused imports
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+      
       // TypeScript specific rules
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': 'off', // Using unused-imports instead
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -57,6 +71,8 @@ export default [
       'no-extra-semi': 'error',
       'no-func-assign': 'error',
       'no-irregular-whitespace': 'error',
+      'no-trailing-spaces': 'error',
+      'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1, maxBOF: 0 }],
       'no-sparse-arrays': 'error',
       'no-unexpected-multiline': 'error',
       'no-unsafe-finally': 'error',
