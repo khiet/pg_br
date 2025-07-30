@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync, readFileSync, mkdirSync } from 'fs';
+import { existsSync, readFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 import { homedir } from 'os';
 import * as yaml from 'js-yaml';
@@ -48,10 +48,12 @@ function showUsage() {
   console.log('Usage:');
   console.log('  pg_br <message>          - Echo a message');
   console.log('  pg_br bak <database_name> <backup_name> - Backup PostgreSQL database');
+  console.log('  pg_br ls                 - List all backups from destination');
   console.log('');
   console.log('Examples:');
   console.log('  pg_br hello world');
   console.log('  pg_br bak pave_api_development flipper_tu');
+  console.log('  pg_br ls');
 }
 
 function formatDate(): string {
@@ -60,6 +62,71 @@ function formatDate(): string {
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function listBackups() {
+  try {
+    const config = loadConfig();
+    
+    // Determine backup destination
+    let backupDir: string;
+    if (config.destination) {
+      backupDir = resolve(config.destination);
+    } else {
+      backupDir = process.cwd();
+    }
+    
+    console.log(`Listing backups from: ${backupDir}`);
+    console.log();
+    
+    if (!existsSync(backupDir)) {
+      console.log('No backup directory found.');
+      return;
+    }
+    
+    try {
+      const files = readdirSync(backupDir)
+        .filter(file => file.endsWith('.dump'))
+        .map(file => {
+          const filePath = join(backupDir, file);
+          const stats = statSync(filePath);
+          return {
+            name: file,
+            size: stats.size,
+            created: stats.birthtime,
+            modified: stats.mtime
+          };
+        })
+        .sort((a, b) => b.created.getTime() - a.created.getTime());
+      
+      if (files.length === 0) {
+        console.log('No backup files found.');
+        return;
+      }
+      
+      console.log(`Found ${files.length} backup(s):`);
+      console.log();
+      
+      files.forEach(file => {
+        const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+        const createdDate = file.created.toLocaleDateString();
+        const createdTime = file.created.toLocaleTimeString();
+        
+        console.log(`📁 ${file.name}`);
+        console.log(`   Size: ${sizeInMB} MB`);
+        console.log(`   Created: ${createdDate} ${createdTime}`);
+        console.log();
+      });
+      
+    } catch (readError) {
+      console.error('Error reading backup directory:', readError instanceof Error ? readError.message : String(readError));
+      process.exit(1);
+    }
+    
+  } catch (error) {
+    console.error('Error listing backups:', error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
 }
 
 function backupDatabase(databaseName: string, backupName: string) {
@@ -113,6 +180,8 @@ if (command === 'bak') {
   
   const [, databaseName, backupName] = args;
   backupDatabase(databaseName, backupName);
+} else if (command === 'ls') {
+  listBackups();
 } else if (command === 'help' || command === '--help' || command === '-h') {
   showUsage();
 } else if (args.length === 0) {
