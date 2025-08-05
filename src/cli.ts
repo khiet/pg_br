@@ -51,7 +51,7 @@ if (command === 'backup') {
     process.exit(1);
   }
 
-  removeCommand();
+  removeCommand().catch(() => process.exit(1));
 } else if (command === 'ls') {
   listCommand();
 } else if (command === 'help' || command === '--help' || command === '-h') {

@@ -98,9 +98,10 @@ export function promptConfirmation(filePaths: string[]): Promise<boolean> {
     });
     console.log();
 
-    rl.question('Are you sure you want to remove these files? (yes/no): ', answer => {
+    rl.question('Are you sure you want to remove these files? (Y/n): ', answer => {
       rl.close();
-      resolve(answer.trim().toLowerCase() === 'yes');
+      const trimmed = answer.trim().toLowerCase();
+      resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
     });
   });
 }
