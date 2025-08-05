@@ -1,10 +1,35 @@
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
-import { loadConfig, promptOverwriteConfirmation } from '../utils/index.js';
+import {
+  loadConfig,
+  promptOverwriteConfirmation,
+  promptDatabaseSelection,
+  promptBackupName,
+} from '../utils/index.js';
 
-export async function backupCommand(databaseName: string, backupName: string): Promise<void> {
+export async function backupCommand(databaseName?: string, backupName?: string): Promise<void> {
   try {
+    // Interactive mode: prompt for database and backup name if not provided
+    if (!databaseName) {
+      try {
+        databaseName = await promptDatabaseSelection();
+        console.log(`Selected database: ${databaseName}`);
+      } catch (error) {
+        console.error('✗', error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
+    }
+
+    if (!backupName) {
+      try {
+        backupName = await promptBackupName();
+      } catch (error) {
+        console.error('✗', error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
+    }
+
     const config = loadConfig();
     const fileName = `${backupName}.dump`;
 

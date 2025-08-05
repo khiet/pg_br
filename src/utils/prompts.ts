@@ -1,5 +1,6 @@
 import * as readline from 'readline';
 import { BackupFileBasic } from '../types/index.js';
+import { execSync } from 'child_process';
 
 export function promptFileSelection(files: BackupFileBasic[]): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -116,5 +117,106 @@ export function promptOverwriteConfirmation(fileName: string): Promise<boolean> 
       const trimmed = answer.trim().toLowerCase();
       resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
     });
+  });
+}
+
+export function getAvailableDatabases(): string[] {
+  try {
+    const output = execSync('psql -l -t', { encoding: 'utf8' });
+    const databases: string[] = [];
+
+    const lines = output.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('|')) {
+        const parts = trimmed.split('|');
+        if (parts.length > 0) {
+          const dbName = parts[0].trim();
+          if (dbName && dbName !== 'Name' && !dbName.startsWith('(') && !dbName.startsWith('-')) {
+            databases.push(dbName);
+          }
+        }
+      }
+    }
+
+    return databases.filter(db => db && db !== 'template0' && db !== 'template1');
+  } catch {
+    throw new Error(
+      'Failed to list databases. Make sure PostgreSQL is running and psql is available.'
+    );
+  }
+}
+
+export function promptDatabaseSelection(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      const databases = getAvailableDatabases();
+
+      if (databases.length === 0) {
+        reject(new Error('No databases found.'));
+        return;
+      }
+
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+      console.log('\nAvailable databases:');
+      databases.forEach((db, index) => {
+        console.log(`  ${index + 1}. ${db}`);
+      });
+      console.log();
+
+      rl.question('Select a database (enter number): ', answer => {
+        rl.close();
+
+        const selection = parseInt(answer.trim(), 10);
+        if (isNaN(selection) || selection < 1 || selection > databases.length) {
+          reject(new Error('Invalid selection. Please enter a valid number.'));
+          return;
+        }
+
+        resolve(databases[selection - 1]);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function promptBackupName(): Promise<string> {
+  return new Promise(resolve => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    const askForName = () => {
+      rl.question('Enter backup name (without .dump extension): ', answer => {
+        const trimmed = answer.trim();
+
+        if (!trimmed) {
+          console.log('Backup name cannot be empty. Please try again.');
+          askForName();
+          return;
+        }
+
+        if (trimmed.includes('/') || trimmed.includes('\\')) {
+          console.log('Backup name cannot contain path separators. Please try again.');
+          askForName();
+          return;
+        }
+
+        if (trimmed.endsWith('.dump')) {
+          resolve(trimmed.slice(0, -5));
+        } else {
+          resolve(trimmed);
+        }
+        rl.close();
+      });
+    };
+
+    askForName();
   });
 }
