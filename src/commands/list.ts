@@ -27,8 +27,9 @@ export function listCommand(): void {
       const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
       const createdDate = file.created.toLocaleDateString();
       const createdTime = file.created.toLocaleTimeString();
+      const displayName = file.name.endsWith('.dump') ? file.name.slice(0, -5) : file.name;
 
-      console.log(`📁 ${file.name}`);
+      console.log(`📁 ${displayName}`);
       console.log(`   Size: ${sizeInMB} MB`);
       console.log(`   Created: ${createdDate} ${createdTime}`);
       console.log();
