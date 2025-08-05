@@ -33,7 +33,10 @@ npm run dev <arguments>
 Examples:
 
 ```bash
-npm run dev backup <database_name> <backup_name>
+npm run dev backup [database_name] [backup_name]
+# Interactive mode: prompts for database and backup name if not provided
+# With 1 arg: uses given database, prompts for backup name
+# With 2 args: uses given database and backup name
 # Creates backup: <backup_name>.dump
 
 npm run dev ls
@@ -63,7 +66,10 @@ Run the built CLI:
 Examples:
 
 ```bash
-./dist/cli.js backup <database_name> <backup_name>
+./dist/cli.js backup [database_name] [backup_name]
+# Interactive mode: prompts for database and backup name if not provided
+# With 1 arg: uses given database, prompts for backup name
+# With 2 args: uses given database and backup name
 # Creates backup: <backup_name>.dump
 
 ./dist/cli.js ls
@@ -87,7 +93,10 @@ pg_br <arguments>
 Examples:
 
 ```bash
-pg_br backup <database_name> <backup_name>
+pg_br backup [database_name] [backup_name]
+# Interactive mode: prompts for database and backup name if not provided
+# With 1 arg: uses given database, prompts for backup name
+# With 2 args: uses given database and backup name
 # Creates backup: <backup_name>.dump
 
 pg_br ls
@@ -105,10 +114,16 @@ pg_br remove
 ### Database Backup
 
 ```bash
-pg_br backup <database_name> <backup_name>
+pg_br backup [database_name] [backup_name]
 ```
 
-Creates a PostgreSQL database backup using `pg_dump` with the following flags:
+Creates a PostgreSQL database backup using `pg_dump`. The command supports three modes:
+
+- **No arguments**: Interactive mode - prompts for database selection from available PostgreSQL databases, then prompts for backup name
+- **One argument**: Uses the provided database name and prompts for backup name
+- **Two arguments**: Uses both provided database and backup name (non-interactive)
+
+The backup uses `pg_dump` with the following flags:
 
 - `--verbose` - Verbose output
 - `--clean` - Include clean (drop) commands
