@@ -103,3 +103,18 @@ export function promptConfirmation(filePaths: string[]): Promise<boolean> {
     });
   });
 }
+
+export function promptOverwriteConfirmation(fileName: string): Promise<boolean> {
+  return new Promise(resolve => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question(`Backup file '${fileName}' already exists. Overwrite? (Y/n): `, answer => {
+      rl.close();
+      const trimmed = answer.trim().toLowerCase();
+      resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
+    });
+  });
+}

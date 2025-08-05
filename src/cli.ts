@@ -23,7 +23,7 @@ if (command === 'backup') {
   }
 
   const [, databaseName, backupName] = args;
-  backupCommand(databaseName, backupName);
+  backupCommand(databaseName, backupName).catch(() => process.exit(1));
 } else if (command === 'restore') {
   if (args.length !== 2) {
     console.error('Error: restore command requires exactly 1 argument');

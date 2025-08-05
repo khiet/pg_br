@@ -1,9 +1,9 @@
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
-import { loadConfig } from '../utils/index.js';
+import { loadConfig, promptOverwriteConfirmation } from '../utils/index.js';
 
-export function backupCommand(databaseName: string, backupName: string): void {
+export async function backupCommand(databaseName: string, backupName: string): Promise<void> {
   try {
     const config = loadConfig();
     const fileName = `${backupName}.dump`;
@@ -23,6 +23,14 @@ export function backupCommand(databaseName: string, backupName: string): void {
     }
 
     const backupPath = join(backupDir, fileName);
+
+    if (existsSync(backupPath)) {
+      const shouldOverwrite = await promptOverwriteConfirmation(fileName);
+      if (!shouldOverwrite) {
+        console.log('Backup cancelled.');
+        process.exit(0);
+      }
+    }
 
     console.log(`Creating backup of database '${databaseName}' as '${fileName}'...`);
 
