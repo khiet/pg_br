@@ -1,19 +1,36 @@
 import { execSync } from 'child_process';
-import { getBackupFiles, promptMultiFileSelection, promptConfirmation } from '../utils/index.js';
+import {
+  getBackupsByDatabase,
+  promptMultiFileSelection,
+  promptConfirmation,
+} from '../utils/index.js';
+import { BackupFileBasic } from '../types/index.js';
 
 export async function removeCommand(): Promise<void> {
   try {
     console.log('Preparing to remove backup files...');
 
-    const backupFiles = getBackupFiles();
+    const backupsByDb = getBackupsByDatabase();
+    const databases = Object.keys(backupsByDb);
 
-    if (backupFiles.length === 0) {
+    if (databases.length === 0) {
       console.log('No backup files found in the destination directory.');
       console.log('Use "pg_br ls" to check available backups.');
       return;
     }
 
-    const selectedPaths = await promptMultiFileSelection(backupFiles);
+    // Create a flat list of files with database context for selection
+    const allBackupFiles: BackupFileBasic[] = [];
+    databases.sort().forEach(dbName => {
+      backupsByDb[dbName].forEach(file => {
+        allBackupFiles.push({
+          name: `[${dbName}] ${file.name}`,
+          path: file.path,
+        });
+      });
+    });
+
+    const selectedPaths = await promptMultiFileSelection(allBackupFiles);
 
     if (selectedPaths.length === 0) {
       console.log('No files selected.');

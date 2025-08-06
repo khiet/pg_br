@@ -133,12 +133,12 @@ The backup uses `pg_dump` with the following flags:
 - `--no-acl` - Skip access control lists
 - `--no-owner` - Skip object ownership
 
-The backup file will be named `<backup_name>.dump` and saved to:
+The backup file will be named `<backup_name>.dump` and saved to a database-specific subdirectory:
 
-- The directory specified in `~/.pg_br.yml` config file (if configured)
-- The current working directory (if no config file exists)
+- `<destination>/<database_name>/<backup_name>.dump` (if destination configured in `~/.pg_br.yml`)
+- `./<database_name>/<backup_name>.dump` (if no config file exists)
 
-The destination directory will be created automatically if it doesn't exist.
+The destination directory and database subdirectory will be created automatically if they don't exist.
 
 ### List Backups
 
@@ -146,7 +146,7 @@ The destination directory will be created automatically if it doesn't exist.
 pg_br ls
 ```
 
-Lists all available backup files from the configured destination directory.
+Lists all available backup files from the configured destination directory, grouped by database. Each database section shows its backups with size and creation date information.
 
 ### Restore Database
 
@@ -156,8 +156,10 @@ pg_br restore [database_name]
 
 Restore a database from available backup files. The command supports two modes:
 
-- **No arguments**: Interactive mode - prompts for database selection from available PostgreSQL databases, then prompts for backup file selection
-- **One argument**: Uses the provided database name and prompts for backup file selection
+- **No arguments**: Interactive mode - prompts for database selection from available PostgreSQL databases, then prompts for backup file selection from that database's backups
+- **One argument**: Uses the provided database name and prompts for backup file selection from that database's specific backups
+
+Only backup files that belong to the selected database (stored in `<destination>/<database_name>/` directory) will be shown for selection.
 
 The restore uses `pg_restore` with the following flags:
 
@@ -172,7 +174,7 @@ The restore uses `pg_restore` with the following flags:
 pg_br remove
 ```
 
-Interactively remove backup files. Supports individual selections and ranges (e.g., `1,3,5` or `1-3,7-9`).
+Interactively remove backup files. Shows all backup files across all databases with database context (e.g., `[database_name] backup_file.dump`). Supports individual selections and ranges (e.g., `1,3,5` or `1-3,7-9`).
 
 ### Help
 
@@ -202,6 +204,29 @@ Shows usage information.
 ## Configuration
 
 `pg_br` supports a YAML configuration file located at `~/.pg_br.yml` for customizing backup behavior. Create the file at `~/.pg_br.yml`, using `.pg_br.yml.example` as a reference.
+
+## Directory Structure
+
+`pg_br` organizes backups by database to keep them separated and organized:
+
+```
+<destination>/
+├── database1/
+│   ├── backup1.dump
+│   ├── backup2.dump
+│   └── backup3.dump
+├── database2/
+│   ├── backup1.dump
+│   └── backup2.dump
+└── database3/
+    └── backup1.dump
+```
+
+This structure ensures:
+- **Namespace separation**: Each database's backups are stored in their own directory
+- **Organized listings**: The `ls` command groups backups by database
+- **Targeted restores**: The `restore` command only shows backups for the selected database
+- **Clear context**: The `remove` command shows which database each backup belongs to
 
 ## Prerequisites
 

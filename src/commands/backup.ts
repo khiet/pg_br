@@ -33,17 +33,19 @@ export async function backupCommand(databaseName?: string, backupName?: string):
     const config = loadConfig();
     const fileName = `${backupName}.dump`;
 
-    let backupDir: string;
+    let baseBackupDir: string;
     if (config.destination) {
-      backupDir = resolve(config.destination);
-      console.log(`Using configured backup destination: ${backupDir}`);
+      baseBackupDir = resolve(config.destination);
+      console.log(`Using configured backup destination: ${baseBackupDir}`);
     } else {
-      backupDir = process.cwd();
+      baseBackupDir = process.cwd();
       console.log('No config found, using current directory');
     }
 
+    // Create database-specific directory
+    const backupDir = join(baseBackupDir, databaseName);
     if (!existsSync(backupDir)) {
-      console.log(`Creating backup directory: ${backupDir}`);
+      console.log(`Creating database-specific backup directory: ${backupDir}`);
       mkdirSync(backupDir, { recursive: true });
     }
 

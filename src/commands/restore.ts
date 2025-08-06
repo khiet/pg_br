@@ -1,5 +1,9 @@
 import { execSync } from 'child_process';
-import { getBackupFiles, promptFileSelection, promptDatabaseSelection } from '../utils/index.js';
+import {
+  getBackupFilesForDatabase,
+  promptFileSelection,
+  promptDatabaseSelection,
+} from '../utils/index.js';
 
 export async function restoreCommand(databaseName?: string): Promise<void> {
   try {
@@ -16,10 +20,10 @@ export async function restoreCommand(databaseName?: string): Promise<void> {
 
     console.log(`Preparing to restore database '${databaseName}'...`);
 
-    const backupFiles = getBackupFiles();
+    const backupFiles = getBackupFilesForDatabase(databaseName);
 
     if (backupFiles.length === 0) {
-      console.log('No backup files found in the destination directory.');
+      console.log(`No backup files found for database '${databaseName}'.`);
       console.log('Use "pg_br ls" to check available backups.');
       return;
     }
