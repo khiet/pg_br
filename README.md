@@ -42,8 +42,9 @@ npm run dev backup [database_name] [backup_name]
 npm run dev ls
 # Lists all backup files
 
-npm run dev restore <database_name>
-# Interactive restore from backup files
+npm run dev restore [database_name]
+# Interactive mode: prompts for database and backup file selection if database not provided
+# With 1 arg: uses given database, prompts for backup file selection
 
 npm run dev remove
 # Interactive removal of backup files
@@ -75,8 +76,9 @@ Examples:
 ./dist/cli.js ls
 # Lists all backup files
 
-./dist/cli.js restore <database_name>
-# Interactive restore from backup files
+./dist/cli.js restore [database_name]
+# Interactive mode: prompts for database and backup file selection if database not provided
+# With 1 arg: uses given database, prompts for backup file selection
 
 ./dist/cli.js remove
 # Interactive removal of backup files
@@ -102,8 +104,9 @@ pg_br backup [database_name] [backup_name]
 pg_br ls
 # Lists all backup files
 
-pg_br restore <database_name>
-# Interactive restore from backup files
+pg_br restore [database_name]
+# Interactive mode: prompts for database and backup file selection if database not provided
+# With 1 arg: uses given database, prompts for backup file selection
 
 pg_br remove
 # Interactive removal of backup files
@@ -148,10 +151,20 @@ Lists all available backup files from the configured destination directory.
 ### Restore Database
 
 ```bash
-pg_br restore <database_name>
+pg_br restore [database_name]
 ```
 
-Interactively restore a database from available backup files. Prompts you to select from available backup files.
+Restore a database from available backup files. The command supports two modes:
+
+- **No arguments**: Interactive mode - prompts for database selection from available PostgreSQL databases, then prompts for backup file selection
+- **One argument**: Uses the provided database name and prompts for backup file selection
+
+The restore uses `pg_restore` with the following flags:
+
+- `--verbose` - Verbose output
+- `--clean` - Drop database objects before recreating
+- `--no-acl` - Skip access control lists
+- `--no-owner` - Skip object ownership
 
 ### Remove Backups
 
