@@ -9,7 +9,7 @@ function showUsage() {
   console.log('Usage:');
   console.log('  pg_br backup [database_name] [backup_name] - Backup PostgreSQL database');
   console.log('  pg_br ls                                   - List all backups from destination');
-  console.log('  pg_br restore <database_name>              - Restore database from backup file');
+  console.log('  pg_br restore [database_name]              - Restore database from backup file');
   console.log(
     '  pg_br remove                               - Remove backup files from destination'
   );
@@ -36,14 +36,20 @@ if (command === 'backup') {
     process.exit(1);
   }
 } else if (command === 'restore') {
-  if (args.length !== 2) {
-    console.error('Error: restore command requires exactly 1 argument');
-    console.error('Usage: pg_br restore <database_name>');
+  if (args.length === 1) {
+    // Interactive mode - no database name provided
+    restoreCommand().catch(() => process.exit(1));
+  } else if (args.length === 2) {
+    // Database name provided
+    const [, databaseName] = args;
+    restoreCommand(databaseName).catch(() => process.exit(1));
+  } else {
+    console.error('Error: restore command takes 0 or 1 arguments');
+    console.error('Usage: pg_br restore [database_name]');
+    console.error('  - With no arguments: interactive mode');
+    console.error('  - With 1 argument: use given database name');
     process.exit(1);
   }
-
-  const [, databaseName] = args;
-  restoreCommand(databaseName);
 } else if (command === 'remove') {
   if (args.length !== 1) {
     console.error('Error: remove command requires no arguments');

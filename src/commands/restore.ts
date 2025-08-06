@@ -1,8 +1,19 @@
 import { execSync } from 'child_process';
-import { getBackupFiles, promptFileSelection } from '../utils/index.js';
+import { getBackupFiles, promptFileSelection, promptDatabaseSelection } from '../utils/index.js';
 
-export function restoreCommand(databaseName: string): void {
+export async function restoreCommand(databaseName?: string): Promise<void> {
   try {
+    // Interactive mode: prompt for database name if not provided
+    if (!databaseName) {
+      try {
+        databaseName = await promptDatabaseSelection();
+        console.log(`Selected database: ${databaseName}`);
+      } catch (error) {
+        console.error('✗', error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
+    }
+
     console.log(`Preparing to restore database '${databaseName}'...`);
 
     const backupFiles = getBackupFiles();
